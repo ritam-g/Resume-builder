@@ -10,24 +10,47 @@ import { NextRequest } from "next/server";
 // 401
 
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
-        const cookie = await cookies()
-        const isRefreshToken = cookie.get('refreshToken')
-        if(!isRefreshToken){
-            return Response.json({message:"Unauthorized"},{status:401})
-        }
-        const user = await rotateToken()
-        if(!user){
-            return Response.json({message:"Unauthorized"},{status:401})
+        const cookieStore = await cookies();
+
+        const refreshToken = cookieStore.get("refreshToken");
+
+        if (!refreshToken) {
+            const response: ApiResponse = {
+                success: false,
+                message: "Unauthorized",
+            };
+
+            return Response.json(response, { status: 401 });
         }
 
-        const response: ApiResponse = { message: "Refresh token successfully", success: true, data: user }
-        return Response.json(response, { status: 200 })
+        const user = await rotateToken();
+
+        if (!user) {
+            const response: ApiResponse = {
+                success: false,
+                message: "Unauthorized",
+            };
+
+            return Response.json(response, { status: 401 });
+        }
+
+        const response: ApiResponse = {
+            success: true,
+            message: "Token refreshed successfully",
+            data: user,
+        };
+
+        return Response.json(response, { status: 200 });
+
     } catch (error) {
-        const response: ApiResponse = { message: "Something went wrong", success: false, error: error }
+        const response: ApiResponse = {
+            success: false,
+            message: "Something went wrong",
+            error,
+        };
 
-        return Response.json(response, { status: 500 })
-
+        return Response.json(response, { status: 500 });
     }
 }

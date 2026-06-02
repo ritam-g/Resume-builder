@@ -75,17 +75,12 @@ export async function rotateToken() {
             id: user._id.toString(),
         });
 
-        const newRefreshToken = generateRefreshToken({
-            id: user._id.toString(),
-        });
-
-        user.refreshToken = newRefreshToken;
+        
 
         await user.save();
 
         await setAccessCookie(newAccessToken);
 
-        await setRefreshCookie(newRefreshToken);
 
         return {
             id: user._id,
