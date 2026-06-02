@@ -9,7 +9,7 @@ import { setAccessCookie, setRefreshCookie } from "@/lib/cookies";
 import { generateAccessToken, generateRefreshToken } from "@/lib/jwt";
 import { connectDB } from "@/lib/mongoose";
 import userModel from "@/models/User.model";
-import { ApiResponse } from "@/types/apiResponse.type";
+import { ApiResponse, LooginBody } from "@/types/apiResponse.type";
 import { NextRequest } from "next/server";
 
 // NextRequest
@@ -19,7 +19,9 @@ export async function POST(req: NextRequest) {
         await connectDB()
 
         // get body
-        const { email, password } = await req.json()
+        const body: LooginBody = await req.json();
+
+        const { email, password } = body;
 
         // validate fields
         if (!email || !password) {
@@ -54,7 +56,7 @@ export async function POST(req: NextRequest) {
         await setAccessCookie(accessToken)
         await setRefreshCookie(refreshToken)
 
-        const response: ApiResponse = { message: "Login successful", success: true }
+        const response: ApiResponse = { message: "Login successful", success: true, data: { user: isMatch } }
         return Response.json(response, { status: 200 })
     } catch (error) {
         console.log(error)

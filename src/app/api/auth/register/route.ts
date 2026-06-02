@@ -2,7 +2,7 @@ import { setAccessCookie, setRefreshCookie } from "@/lib/cookies";
 import { generateAccessToken, generateRefreshToken } from "@/lib/jwt";
 import { connectDB } from "@/lib/mongoose";
 import userModel from "@/models/User.model";
-import { ApiResponse } from "@/types/apiResponse.type";
+import { ApiResponse, RegisterBody } from "@/types/apiResponse.type";
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -12,7 +12,9 @@ export async function POST(req: NextRequest) {
         // connect db
         await connectDB()
         // get body
-        const { name, email, password, mobile } = await req.json()
+        const body: RegisterBody = await req.json();
+
+        const { name, email, password, mobile } = body;
         // validate fields
         if (!name || !email || !password || !mobile) {
             return Response.json({
@@ -47,6 +49,7 @@ export async function POST(req: NextRequest) {
         const response: ApiResponse = {
             message: "User created successfully",
             success: true,
+            data: { user: newUser }
         };
 
         return Response.json(response);

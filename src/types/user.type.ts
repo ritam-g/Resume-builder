@@ -3,7 +3,7 @@ export interface IUser {
     email: string,
     password: string,
     mobile: number,
-    refreshToken: string
+    refreshToken: string | null
 }
 
 
