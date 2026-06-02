@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
         }
 
         // check existing user
-        const isMatch = await userModel.findOne({ email })
+        const isMatch = await userModel.findOne({ email }).select("+password")
         if (!isMatch) {
             const response: ApiResponse = { message: "User not found", success: false }
             return Response.json(response, { status: 400 })
