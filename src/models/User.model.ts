@@ -1,37 +1,53 @@
-import { IUser } from "@/types/user.types"
-import mongoose from "mongoose"
+import { IUser } from "@/types/user.type";
+import mongoose, { Document } from "mongoose";
+import bcrypt from "bcrypt"
 
-
-
-
-let userSchema = new mongoose.Schema<IUser>({
+export interface IUserMethods {
+    comparePassword(password: string): Promise<boolean>;
+}
+export type UserDocument = IUser & IUserMethods & Document;
+const userSchema = new mongoose.Schema<UserDocument>({
     name: {
         type: String,
-        trim: true,
-        required: [true, "Name is required"]
+        required: [true, "Name is required"],
+        trim: true
     },
     email: {
         type: String,
-        trim: true,
         required: [true, "Email is required"],
-        unique: true
+        unique: true,
+        lowercase: true
     },
     password: {
         type: String,
-        trim: true,
         required: [true, "Password is required"],
-        minlength: [6, "Password must be at least 6 characters"],
-        maxlength: [1024, "Password can not be more than 1024 characters"]
+        minLength: [6, "Password must be at least 6 characters"],
+        select: false
+
     },
-    modbile: {
+    mobile: {
+        type: Number,
+        required: [true, "Mobile is required"],
+        unique: true
+    },
+    refreshToken: {
         type: String,
-        trim: true
+        default: null
     }
 }, {
     timestamps: true
 })
-// hash passwrod also isModified thing return void 
-// compare pas return boolean
-const userModel = mongoose.model("User", userSchema)
+
+userSchema.pre("save", async function () {
+    if (!this.isModified("password")) return;
+
+    this.password = await bcrypt.hash(this.password, 10);
+});
+
+userSchema.methods.comparePassword = async function (checkPassword: string) {
+    return await bcrypt.compare(checkPassword, this.password);
+};
+
+const userModel = mongoose.models.User || mongoose.model("User", userSchema);
 
 export default userModel

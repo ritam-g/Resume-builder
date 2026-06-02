@@ -1,81 +1,66 @@
-import { connectDb } from "@/lib/mongoose";
-import { RegisterBody } from "@/types/user.types";
-import { NextRequest, NextResponse } from "next/server";
-import { ApiResponse } from "./api.types";
+import { setAccessCookie, setRefreshCookie } from "@/lib/cookies";
+import { generateAccessToken, generateRefreshToken } from "@/lib/jwt";
+import { connectDB } from "@/lib/mongoose";
 import userModel from "@/models/User.model";
-import { generateToken } from "@/lib/jwt";
+import { ApiResponse } from "@/types/apiResponse.type";
+import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
+
+
     try {
-        await connectDb();
-
-        const body: RegisterBody = await req.json();
-        const { name, email, password, modbile } = body;
-
-        if (!name || !email || !password || !modbile) {
-            return NextResponse.json<ApiResponse>({
-                message: "All fields are required",
-                sucess: false,
-            }, {
-                status: 400,
-            });
+        // connect db
+        await connectDB()
+        // get body
+        const { name, email, password, mobile } = await req.json()
+        // validate fields
+        if (!name || !email || !password || !mobile) {
+            return Response.json({
+                message: "All fields are required"
+            }, { status: 400 })
         }
-
-        const isExist = await userModel.findOne({ email });
-
-        if (isExist) {
-            return NextResponse.json<ApiResponse>({
-                message: "User already exists",
-                sucess: false,
-            }, {
-                status: 409,
-            });
+        // check existing user
+        const isMatch = await userModel.findOne({ $or: [{ email }, { mobile }], })
+        if (isMatch) {
+            return Response.json({
+                message: "User already exists"
+            }, { status: 400 })
         }
+        // create user
+        const newUser = await userModel.create({ name, email, password, mobile })
+        // generate access token
+        const accessToken = await generateAccessToken({ id: newUser._id.toString() })
+        // generate refresh token
+        const refreshToken = await generateRefreshToken({ id: newUser._id.toString() })
 
-        const newUser = await userModel.create({
-            name,
-            email,
-            password,
-            modbile,
-        });
+        // save refresh token to db
+        newUser.refreshToken = refreshToken
+        await newUser.save()
+        // create response
+        await setAccessCookie(accessToken)
+        await setRefreshCookie(refreshToken)
+        // set access cookie
 
-        const token = generateToken({
-            userId: newUser._id.toString(),
-        });
+        // set refresh cookie
 
-        const response = NextResponse.json<ApiResponse>({
+        // return response
+        const response: ApiResponse = {
             message: "User created successfully",
-            sucess: true,
-            data: {
-                user: {
-                    _id: newUser._id,
-                    name: newUser.name,
-                    email: newUser.email,
-                    modbile: newUser.modbile,
-                },
-            },
-        }, {
-            status: 201,
-        });
+            success: true,
+        };
 
-        response.cookies.set("token", token, {
-            httpOnly: true,
-            sameSite: "lax",
-            maxAge: 60 * 60,
-            secure: process.env.NODE_ENV === "production",
-        });
-
-        return response;
-
+        return Response.json(response);
     } catch (error) {
-        console.error(error);
-
-        return NextResponse.json<ApiResponse>({
+        console.log(error)
+        const response: ApiResponse = {
             message: "Something went wrong",
-            sucess: false,
-            erors:  error
-        }, {
-            status: 500,
-        });
+            error: error,
+            success: false,
+        };
+        if (error instanceof Error) {
+            return Response.json(response, { status: 500 })
+        } else {
+            return Response.json(response, { status: 500 })
+        }
     }
 }

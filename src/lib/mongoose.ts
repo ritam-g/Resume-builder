@@ -1,11 +1,16 @@
 import mongoose from "mongoose";
 
-export async function connectDb() {
+/**  
+ * Connect to MongoDB
+ * @function connectDB
+ * @returns {Promise<void>}
+ */
+export async function connectDB() {
     try {
-        if (process.env.MONGODB_URI) {
-            await mongoose.connect(process.env.MONGODB_URI!)
-        }
-        console.log('db is connected')
+        await mongoose.connect(process.env.MONGODB_URL!)
+
+        console.log("Connected to MongoDB")
+
     } catch (error) {
         console.log(error)
     }
