@@ -21,3 +21,7 @@ export interface GenerateExperienceDescriptionBody {
     endDate: string;
     skills: string[];
 }
+
+export interface ImproveContentBody{
+    content:string
+}
