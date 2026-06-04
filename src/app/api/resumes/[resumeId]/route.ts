@@ -13,7 +13,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ resu
         const { resumeId } = await params
 
         const resume = await resumeModel.findOne({ _id: resumeId
-        //  , user_id: user
+         , user_id: user
          })
 
         if (!resume) {
