@@ -7,7 +7,9 @@ import { NextRequest } from "next/server";
 export async function POST(req: NextRequest) {
     try {
         await connectDB()
+
         const user_id = await getCurrentUserId()
+        
         const newResume = await resumeModel.create({
             user_id,
             title: "My Resume",

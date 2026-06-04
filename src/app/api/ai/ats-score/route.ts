@@ -1,86 +1,106 @@
 import { main } from "@/lib/gemini";
-import { ImproveContentBody } from "@/types/ai.types";
+import { ATSScoreBody } from "@/types/ai.types";
 import { ApiResponse } from "@/types/apiResponse.type";
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
-    try {
-        const body: ImproveContentBody = await req.json();
+  try {
+    const body: ATSScoreBody = await req.json();
 
-        const { content } = body;
 
-        if (!content) {
-            const response: ApiResponse = {
-                message: "Content is required",
-                success: false
-            };
+    const { resumeText } = body;
 
-            return Response.json(response, { status: 400 });
-        }
+    if (!resumeText) {
+      const response: ApiResponse = {
+        message: "Resume text is required",
+        success: false,
+      };
 
-        const prompt = `
-You are an expert ATS (Applicant Tracking System) resume reviewer.
+      return Response.json(response, { status: 400 });
+    }
 
-Analyze the following resume content and provide an ATS score.
+    const prompt = `
+      
 
-Resume Content:
-${content}
+You are a professional ATS (Applicant Tracking System) resume reviewer.
 
-Requirements:
-- Give an ATS score between 0 and 100.
-- Evaluate:
-  - Keyword optimization
-  - Professional language
-  - Readability
-  - ATS compatibility
-  - Impact and achievements
-- List strengths.
-- List weaknesses.
-- Give actionable suggestions for improvement.
-- Be concise and professional.
+Analyze the following resume and provide a detailed ATS evaluation.
 
-Return ONLY valid JSON:
+Resume:
+${resumeText}
+
+Evaluation Criteria:
+
+1. ATS Compatibility
+2. Keyword Optimization
+3. Professional Summary
+4. Skills Section
+5. Work Experience
+6. Projects
+7. Education
+8. Achievements & Impact
+9. Formatting & Readability
+
+Instructions:
+
+* Assign an overall ATS score between 0 and 100.
+* Provide 3-5 strengths.
+* Provide 3-5 weaknesses.
+* Provide 5 actionable suggestions to improve the ATS score.
+* Be objective and professional.
+* Focus on resume quality and ATS optimization.
+* Return ONLY valid JSON.
+* Do not include markdown.
+
+Return JSON in this exact format:
 
 {
-  "score": 85,
-  "strengths": [
-    "Strength 1",
-    "Strength 2",
-    "Strength 3"
-  ],
-  "weaknesses": [
-    "Weakness 1",
-    "Weakness 2"
-  ],
-  "suggestions": [
-    "Suggestion 1",
-    "Suggestion 2",
-    "Suggestion 3"
-  ]
+"score": 85,
+"strengths": [
+"Strength 1",
+"Strength 2",
+"Strength 3"
+],
+"weaknesses": [
+"Weakness 1",
+"Weakness 2",
+"Weakness 3"
+],
+"suggestions": [
+"Suggestion 1",
+"Suggestion 2",
+"Suggestion 3",
+"Suggestion 4",
+"Suggestion 5"
+]
 }
 `;
 
-        const result = await main(prompt) as string;
 
-        const parsed = JSON.parse(result);
+    const result = await main(prompt) as string;
 
-        const response: ApiResponse = {
-            message: "ATS score generated successfully",
-            success: true,
-            data: parsed
-        };
+    const atsReport = JSON.parse(result);
 
-        return Response.json(response, { status: 200 });
+    const response: ApiResponse = {
+      message: "ATS score generated successfully",
+      success: true,
+      data: atsReport,
+    };
 
-    } catch (error) {
-        console.log(error);
+    return Response.json(response, { status: 200 });
 
-        const response: ApiResponse = {
-            message: "Something went wrong",
-            success: false,
-            error
-        };
+  } catch (error) {
+    console.log(error);
 
-        return Response.json(response, { status: 500 });
-    }
+    const response: ApiResponse = {
+      message: "Failed to generate ATS score",
+      success: false,
+      error,
+    };
+
+    return Response.json(response, { status: 500 });
+  }
+
+
 }
+

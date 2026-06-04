@@ -22,6 +22,10 @@ export interface GenerateExperienceDescriptionBody {
     skills: string[];
 }
 
-export interface ImproveContentBody{
-    content:string
+export interface ImproveContentBody {
+    content: string
+}
+
+export interface ATSScoreBody {
+    resumeText: string;
 }
