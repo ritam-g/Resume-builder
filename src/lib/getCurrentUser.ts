@@ -10,9 +10,9 @@ export async function getCurrentUserId() {
     }
     const decode = await verifyAccessToken(token)
 
-    if(!decode){
-        throw new Error("invalid creadential")
+    if (!decode || typeof decode === "string" || !("id" in decode)) {
+        throw new Error("invalid creadential");
     }
 
-    return decode.id
+    return decode.id;
 }

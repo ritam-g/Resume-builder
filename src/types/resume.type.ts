@@ -43,6 +43,8 @@ export interface IResume {
     projects: iProject[];
     education: IEducation[];
     _id?: string;
+    createdAt?: string;
+    updatedAt?: string;
     user_id: Types.ObjectId;
     title: string;
     summery: string;
@@ -51,3 +53,35 @@ export interface IResume {
     skills: string[];
 
 }
+
+export interface SummarySectionData {
+    title: string;
+    summery: string;
+}
+
+export type PersonalInfoSectionData = IPersonalInfo;
+
+export type WorkExperienceSectionData = IWorkExperience[];
+
+export type ProjectSectionData = iProject[];
+
+export type EducationSectionData = IEducation[];
+
+export interface SkillsSectionData {
+    skills: string[];
+    certifications: string[];
+    acheivements: string[];
+}
+
+export type ResumeUpdatableSection =
+    | "title"
+    | "summery"
+    | "personalInfo"
+    | "workExperience"
+    | "projects"
+    | "education"
+    | "skills"
+    | "certifications"
+    | "acheivements";
+
+export type ResumeUpdatePayload = Partial<Pick<IResume, ResumeUpdatableSection>>;

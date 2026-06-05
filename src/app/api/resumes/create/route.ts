@@ -21,7 +21,10 @@ export async function POST(req: NextRequest) {
                 mobile: 0,
                 country: "",
                 pincode: 0,
-                location: ""
+                location: "",
+                github: "",
+                linkedin: "",
+                prtfolio: ""
             },
 
             workExperience: [],

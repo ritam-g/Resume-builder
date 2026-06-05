@@ -1,7 +1,7 @@
 import { IResume } from "@/types/resume.type";
 import mongoose from "mongoose";
 
-let resumeSchema = new mongoose.Schema<IResume>({
+const resumeSchema = new mongoose.Schema<IResume>({
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -24,7 +24,10 @@ let resumeSchema = new mongoose.Schema<IResume>({
             mobile: Number,
             country: String,
             pincode: Number,
-            location: String
+            location: String,
+            github: String,
+            linkedin: String,
+            prtfolio: String
         },
         default: {}
     },
